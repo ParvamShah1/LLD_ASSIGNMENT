@@ -1,0 +1,89 @@
+@startuml
+skinparam backgroundColor #1a1a2e
+skinparam classBackgroundColor #16213e
+skinparam classBorderColor #0f3460
+skinparam classFontColor #e0e0e0
+skinparam classAttributeFontColor #b0b0b0
+skinparam arrowColor #e94560
+skinparam stereotypeFontColor #e94560
+skinparam packageBackgroundColor #0f3460
+skinparam packageBorderColor #e94560
+skinparam packageFontColor #e0e0e0
+
+enum Difficulty {
+  EASY
+  HARD
+}
+
+class Snake {
+  - head : int
+  - tail : int
+  + getHead() : int
+  + getTail() : int
+}
+
+class Ladder {
+  - bottom : int
+  - top : int
+  + getBottom() : int
+  + getTop() : int
+}
+
+class Player {
+  - name : String
+  - currentPosition : int
+  + getName() : String
+  + getCurrentPosition() : int
+  + setCurrentPosition(pos : int) : void
+}
+
+class Dice {
+  - maxValue : int
+  - random : Random
+  + roll() : int
+}
+
+class Board {
+  - boardSize : int
+  - snakes : List<Snake>
+  - ladders : List<Ladder>
+  + checkSnakesAndLadders(position : int) : int
+  + getBoardSize() : int
+}
+
+interface MakeMoveStrategy <<interface>> {
+  + executeTurn(player : Player, board : Board, dice : Dice) : boolean
+}
+
+class EasyMoveStrategy {
+  + executeTurn(player : Player, board : Board, dice : Dice) : boolean
+}
+
+class HardMoveStrategy {
+  - maxConsecutiveSixes : int
+  + executeTurn(player : Player, board : Board, dice : Dice) : boolean
+}
+
+class Game {
+  - board : Board
+  - playerQueue : Queue<Player>
+  - dice : Dice
+  - moveStrategy : MakeMoveStrategy
+  + startGame() : void
+}
+
+class GameFactory {
+  + {static} createGame(names : List<String>, snakes : List<Snake>, ladders : List<Ladder>, difficulty : Difficulty) : Game
+}
+
+GameFactory ..> Game : creates
+GameFactory ..> Difficulty
+Game --> Board
+Game --> "*" Player
+Game --> Dice
+Game --> MakeMoveStrategy
+Board --> "*" Snake
+Board --> "*" Ladder
+EasyMoveStrategy ..|> MakeMoveStrategy
+HardMoveStrategy ..|> MakeMoveStrategy
+@enduml

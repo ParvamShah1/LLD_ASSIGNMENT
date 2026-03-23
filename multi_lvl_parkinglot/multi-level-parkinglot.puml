@@ -1,0 +1,101 @@
+@startuml
+skinparam backgroundColor #1a1a2e
+skinparam classBackgroundColor #16213e
+skinparam classBorderColor #0f3460
+skinparam classFontColor #e0e0e0
+skinparam classAttributeFontColor #b0b0b0
+skinparam arrowColor #e94560
+skinparam stereotypeFontColor #e94560
+skinparam packageBackgroundColor #0f3460
+skinparam packageBorderColor #e94560
+skinparam packageFontColor #e0e0e0
+skinparam noteFontColor #e0e0e0
+skinparam noteBackgroundColor #16213e
+skinparam noteBorderColor #0f3460
+
+enum VehicleType {
+  TWO_WHEELER
+  CAR
+  BUS
+}
+
+enum SlotType {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+class Vehicle {
+  - plateNumber : String
+  - category : VehicleType
+  + getPlateNumber() : String
+  + getCategory() : VehicleType
+}
+
+class Slot {
+  - slotId : String
+  - size : SlotType
+  - floor : int
+  - xPos : double
+  - yPos : double
+  - isAvailable : boolean
+  + distanceTo(gate : Gate) : double
+  + markOccupied() : void
+  + markFree() : void
+}
+
+class Gate {
+  - gateId : String
+  - floor : int
+  - xPos : double
+  - yPos : double
+}
+
+class Ticket {
+  - ticketId : String
+  - vehicle : Vehicle
+  - assignedSlot : Slot
+  - entryTime : LocalDateTime
+}
+
+interface SlotAssignmentStrategy <<interface>> {
+  + findSlot(slots : List<Slot>, vehicle : Vehicle, gate : Gate) : Slot
+}
+
+class NearestEuclideanSlotStrategy {
+  - floorPenalty : double
+  + findSlot(slots : List<Slot>, vehicle : Vehicle, gate : Gate) : Slot
+}
+
+interface PricingStrategy <<interface>> {
+  + calculateFee(slotType : SlotType, entry : LocalDateTime, exit : LocalDateTime) : double
+}
+
+class HourlyPricingStrategy {
+  - ratePerHour : Map<SlotType, Double>
+  + calculateFee(slotType : SlotType, entry : LocalDateTime, exit : LocalDateTime) : double
+}
+
+class ParkingLot {
+  - name : String
+  - slots : List<Slot>
+  - gates : List<Gate>
+  - activeTickets : Map<String, Ticket>
+  - slotStrategy : SlotAssignmentStrategy
+  - pricingStrategy : PricingStrategy
+  + park(vehicle : Vehicle, gate : Gate) : Ticket
+  + exit(ticketId : String) : double
+  + printStatus() : void
+}
+
+Vehicle --> VehicleType
+Slot --> SlotType
+Ticket --> Vehicle
+Ticket --> Slot
+ParkingLot --> "*" Slot
+ParkingLot --> "*" Gate
+ParkingLot --> SlotAssignmentStrategy
+ParkingLot --> PricingStrategy
+NearestEuclideanSlotStrategy ..|> SlotAssignmentStrategy
+HourlyPricingStrategy ..|> PricingStrategy
+@enduml

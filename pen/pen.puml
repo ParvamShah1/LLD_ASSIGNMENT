@@ -1,0 +1,99 @@
+@startuml
+skinparam backgroundColor #1a1a2e
+skinparam classBackgroundColor #16213e
+skinparam classBorderColor #0f3460
+skinparam classFontColor #e0e0e0
+skinparam classAttributeFontColor #b0b0b0
+skinparam arrowColor #e94560
+skinparam stereotypeFontColor #e94560
+skinparam packageBackgroundColor #0f3460
+skinparam packageBorderColor #e94560
+skinparam packageFontColor #e0e0e0
+
+enum PenType {
+  BALLPOINT
+  GEL
+  INK
+}
+
+enum MechanismType {
+  CAP
+  CLICK
+}
+
+class Pen {
+  - inkColor : String
+  - activated : boolean
+  - variant : PenType
+  - writeStrategy : WriteStrategy
+  - openCloseStrategy : OpenCloseStrategy
+  - refillStrategy : RefillStrategy
+  + start() : void
+  + close() : void
+  + write() : void
+  + refill(newColor : String) : void
+}
+
+class PenFactory {
+  + {static} buildPen(type : PenType, mechanism : MechanismType, color : String) : Pen
+}
+
+interface WriteStrategy <<interface>> {
+  + perform(inkColor : String) : void
+}
+
+class BallpointWriteStrategy {
+  + perform(inkColor : String) : void
+}
+
+class GelWriteStrategy {
+  + perform(inkColor : String) : void
+}
+
+class InkWriteStrategy {
+  + perform(inkColor : String) : void
+}
+
+interface OpenCloseStrategy <<interface>> {
+  + open() : void
+  + close() : void
+}
+
+class CapStrategy {
+  + open() : void
+  + close() : void
+}
+
+class ClickStrategy {
+  + open() : void
+  + close() : void
+}
+
+interface RefillStrategy <<interface>> {
+  + refill(freshColor : String) : void
+}
+
+class TubeRefillStrategy {
+  + refill(freshColor : String) : void
+}
+
+class BottleRefillStrategy {
+  + refill(freshColor : String) : void
+}
+
+PenFactory ..> Pen : creates
+Pen --> WriteStrategy
+Pen --> OpenCloseStrategy
+Pen --> RefillStrategy
+Pen --> PenType
+
+BallpointWriteStrategy ..|> WriteStrategy
+GelWriteStrategy ..|> WriteStrategy
+InkWriteStrategy ..|> WriteStrategy
+
+CapStrategy ..|> OpenCloseStrategy
+ClickStrategy ..|> OpenCloseStrategy
+
+TubeRefillStrategy ..|> RefillStrategy
+BottleRefillStrategy ..|> RefillStrategy
+@enduml
