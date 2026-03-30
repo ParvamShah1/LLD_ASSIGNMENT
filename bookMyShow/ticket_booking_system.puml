@@ -1,0 +1,134 @@
+@startuml
+skinparam backgroundColor #1a1a2e
+skinparam classBackgroundColor #16213e
+skinparam classBorderColor #0f3460
+skinparam classFontColor #e0e0e0
+skinparam classAttributeFontColor #b0b0b0
+skinparam arrowColor #e94560
+skinparam stereotypeFontColor #e94560
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum SeatCategory {
+  GOLD
+  DIAMOND
+}
+
+enum SeatStatus {
+  AVAILABLE
+  LOCKED
+  BOOKED
+}
+
+class User {
+  - emailId : String
+  - fullName : String
+  + getEmailId() : String
+  + getFullName() : String
+}
+
+class Movie {
+  - movieId : String
+  - title : String
+  - language : String
+  + getTitle() : String
+}
+
+class Theater {
+  - theaterId : String
+  - theaterName : String
+  - location : String
+  - screens : List<Screen>
+  + addScreen(screen : Screen) : void
+}
+
+class Screen {
+  - screenId : String
+  - screenName : String
+  - theater : Theater
+}
+
+class Seat {
+  - seatId : String
+  - rowNum : int
+  - colNum : int
+  - category : SeatCategory
+  + getCategory() : SeatCategory
+}
+
+class ShowSeat {
+  - showSeatId : String
+  - seat : Seat
+  - status : SeatStatus
+  - heldByEmail : String
+  - holdExpiresAt : long
+  + hold(email : String, expiry : long) : void
+  + release() : void
+  + markBooked() : void
+  + isHoldExpired() : boolean
+}
+
+class Show {
+  - showId : String
+  - movie : Movie
+  - screen : Screen
+  - showTimeMillis : long
+  - showSeats : List<ShowSeat>
+}
+
+class Booking {
+  - bookingId : String
+  - user : User
+  - show : Show
+  - reservedSeats : List<ShowSeat>
+  - totalAmount : double
+  - status : BookingStatus
+  + confirm() : void
+  + cancel() : void
+}
+
+interface PricingStrategy <<interface>> {
+  + calculatePrice(seat : ShowSeat, show : Show) : double
+}
+
+class DynamicPricingStrategy {
+  - GOLD_BASE_PRICE : double
+  - DIAMOND_BASE_PRICE : double
+  - SURGE_FACTOR : double
+  + calculatePrice(seat : ShowSeat, show : Show) : double
+}
+
+class SeatLockManager {
+  - holdDurationMillis : long
+  + holdSeats(seats : List<ShowSeat>, user : User) : boolean
+  + releaseSeats(seats : List<ShowSeat>) : void
+}
+
+class TicketBookingSystem {
+  - lockManager : SeatLockManager
+  - pricingStrategy : PricingStrategy
+  + bookTicket(user : User, show : Show, seats : List<ShowSeat>) : Booking
+  + confirmPayment(booking : Booking) : boolean
+  + cancelBooking(booking : Booking) : void
+}
+
+Theater --> "*" Screen
+Screen --> Theater
+Show --> Movie
+Show --> Screen
+Show --> "*" ShowSeat
+ShowSeat --> Seat
+ShowSeat --> SeatStatus
+Seat --> SeatCategory
+Booking --> User
+Booking --> Show
+Booking --> "*" ShowSeat
+Booking --> BookingStatus
+DynamicPricingStrategy ..|> PricingStrategy
+TicketBookingSystem --> SeatLockManager
+TicketBookingSystem --> PricingStrategy
+@enduml
